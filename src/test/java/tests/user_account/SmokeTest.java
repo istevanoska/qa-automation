@@ -1,4 +1,4 @@
-package tests;
+package tests.user_account;
 
 import org.junit.jupiter.api.Test;
 
