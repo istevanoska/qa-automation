@@ -12,7 +12,7 @@ The project explores how AI tools can support automation testing by analyzing ma
 ## About the Project
 This repository contains automation tests created for the **PrestaShop Demo** web application.
 
-The implemented test scenarios are based on test cases and test charters from **Sprint 1** and **Sprint 2**, which were analyzed as input for identifying automation opportunities and maximizing test coverage.
+The implemented test scenarios are based on test cases  and test charters from **Sprint 1** and **Sprint 2**, which were analyzed as input for identifying automation opportunities and maximizing test coverage.
 
 Using AI-assisted workflows, selected functionalities were automated and compared against manually written automation tests.
 
