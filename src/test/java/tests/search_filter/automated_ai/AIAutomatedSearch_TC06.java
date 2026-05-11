@@ -48,6 +48,7 @@ public class AIAutomatedSearch_TC06 {
 
         String[] invalidKeywords = {
                 "xyz123abc",
+                "3",
                 "zzz"
         };
 
