@@ -27,7 +27,6 @@ public class AccountPage {
     private By successAlert = By.cssSelector(".alert-success");
     private By psgdprCheckbox = By.id("field-psgdpr");
     private By customerPrivacyCheckbox = By.id("field-customer_privacy");
-    private By footerInformationLink = By.cssSelector("#link-static-page-contact-2, a[href*='identity']");
 
     public AccountPage(WebDriver driver) {
         this.driver = driver;
