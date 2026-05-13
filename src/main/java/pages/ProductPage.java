@@ -550,5 +550,13 @@ public class ProductPage {
             e.printStackTrace();
         }
     }
+
+    public int getDisplayedProductCount() {
+
+        return driver.findElements(
+                By.cssSelector(".product-miniature")
+        ).size();
+    }
+
 }
 

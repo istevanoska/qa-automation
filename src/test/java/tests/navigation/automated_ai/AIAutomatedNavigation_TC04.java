@@ -1,38 +1,13 @@
 package tests.navigation.automated_ai;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.*;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.*;
-
-import java.time.Duration;
+import base.BaseTest;
+import org.junit.jupiter.api.Test;
+import pages.HomePage;
+import utils.FrameUtils;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AIAutomatedNavigation_TC04 {
-
-    private WebDriver driver;
-    private WebDriverWait wait;
-
-    private static final String URL =
-            "https://demo.prestashop.com/#/en/front";
-
-    @BeforeEach
-    void setUp() {
-
-        WebDriverManager.chromedriver().setup();
-
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--remote-allow-origins=*");
-
-        driver = new ChromeDriver(options);
-
-        wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-
-        driver.manage().window().maximize();
-    }
+public class AIAutomatedNavigation_TC04 extends BaseTest {
 
     @Test
     void shouldNavigateToAllFooterLinks() {
@@ -46,87 +21,31 @@ public class AIAutomatedNavigation_TC04 {
 
         for (String[] footerLink : footerLinks) {
 
-            driver.get(URL);
+            driver.get("https://demo.prestashop.com/#/en/front");
 
-            wait.until(
-                    ExpectedConditions.frameToBeAvailableAndSwitchToIt(0)
+            HomePage homePage = new HomePage(driver);
+
+            FrameUtils.switchToStoreFrame(driver);
+
+            homePage.clickFooterLink(footerLink[0]);
+
+            boolean urlChanged =
+                    new org.openqa.selenium.support.ui.WebDriverWait(
+                            driver,
+                            java.time.Duration.ofSeconds(15)
+                    ).until(driver ->
+                            homePage.getCurrentFrameUrl().contains(footerLink[1])
+                    );
+
+            assertTrue(
+                    urlChanged,
+                    "Expected iframe URL to contain: "
+                            + footerLink[1]
+                            + ", but was: "
+                            + homePage.getCurrentFrameUrl()
             );
 
-            clickFooterLinkAndVerify(
-                    footerLink[0],
-                    footerLink[1]
-            );
-
-            driver.switchTo().defaultContent();
-        }
-    }
-
-    private void clickFooterLinkAndVerify(
-            String footerLinkSelector,
-            String expectedUrlPart
-    ) {
-
-        WebElement footerLink = wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        By.cssSelector(footerLinkSelector)
-                )
-        );
-
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block:'center'});",
-                footerLink
-        );
-
-        sleep(2000);
-
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].click();",
-                footerLink
-        );
-
-        sleep(2500);
-
-        wait.until(driver ->
-                getIframeUrl().contains(expectedUrlPart)
-        );
-
-        String iframeUrl = getIframeUrl();
-
-        assertTrue(
-                iframeUrl.contains(expectedUrlPart),
-                "Expected iframe URL to contain: "
-                        + expectedUrlPart
-                        + ", but was: "
-                        + iframeUrl
-        );
-
-        sleep(3000);
-    }
-
-    private String getIframeUrl() {
-
-        return (String) ((JavascriptExecutor) driver)
-                .executeScript("return window.location.href;");
-    }
-
-    private void sleep(int milliseconds) {
-
-        try {
-
-            Thread.sleep(milliseconds);
-
-        } catch (InterruptedException e) {
-
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    @AfterEach
-    void tearDown() {
-
-        if (driver != null) {
-
-            driver.quit();
+            FrameUtils.switchToDefaultContent(driver);
         }
     }
 }
