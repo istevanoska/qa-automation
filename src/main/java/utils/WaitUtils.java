@@ -37,4 +37,9 @@ public class WaitUtils {
     public static void scrollIntoView(WebDriver driver, WebElement element) {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
     }
+
+    public static boolean waitForText(WebDriver driver,  By locator, String text) {
+        return new WebDriverWait(driver, Duration.ofSeconds(TIMEOUT))
+                .until(ExpectedConditions.textToBePresentInElementLocated(locator, text));
+    }
 }
