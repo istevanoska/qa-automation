@@ -13,7 +13,7 @@ import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TC32_StockStatusTest extends BaseTest {
+public class ManualProductDetails_TC32 extends BaseTest {
 
     // TC.32 - Product Detail Page - Stock Status Display & Behavior of Quantity Selectors
     @Test

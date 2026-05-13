@@ -12,7 +12,7 @@ import pages.ProductPage;
 import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TC29_ProductInformationTest extends BaseTest {
+public class AIAutomatedProductDetails_TC29 extends BaseTest {
 
     // TC.29 - Product Detail Page - Complete Information Display
     @Test

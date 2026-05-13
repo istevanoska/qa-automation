@@ -13,7 +13,7 @@ import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TC27_LogoutTest extends BaseTest {
+public class AIAutomatedUserAccount_TC27 extends BaseTest {
 
     private static final String EMAIL = "pub@prestashop.com";
     private static final String PASSWORD = "123456789";

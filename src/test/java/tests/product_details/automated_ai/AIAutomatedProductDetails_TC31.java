@@ -13,7 +13,7 @@ import pages.ProductPage;
 import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TC31_ProductReviewTest extends BaseTest {
+public class AIAutomatedProductDetails_TC31 extends BaseTest {
 
     private static final String EMAIL = "pub@prestashop.com";
     private static final String PASSWORD = "123456789";

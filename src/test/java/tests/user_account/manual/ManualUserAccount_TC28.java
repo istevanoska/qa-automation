@@ -7,7 +7,7 @@ import pages.LoginPage;
 import pages.AccountPage;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TC28_EditPersonalInformationTest extends BaseTest {
+public class ManualUserAccount_TC28 extends BaseTest {
 
     private static final String TEST_EMAIL = "pub@prestashop.com";
     private static final String TEST_PASS = "123456789";

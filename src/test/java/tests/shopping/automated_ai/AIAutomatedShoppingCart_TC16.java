@@ -1,173 +1,72 @@
 package tests.shopping.automated_ai;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.*;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.*;
+import base.BaseTest;
+import org.junit.jupiter.api.Test;
+import pages.HomePage;
+import pages.ProductPage;
+import utils.WaitUtils;
 
-import java.time.Duration;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class AIAutomatedShoppingCart_TC16 {
-
-    private WebDriver driver;
-    private WebDriverWait wait;
-    private static final String URL = "https://demo.prestashop.com/#/en/front";
-
-    @BeforeEach
-    public void setUp() {
-
-        WebDriverManager.chromedriver().setup();
-
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--remote-allow-origins=*");
-
-        driver = new ChromeDriver(options);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-
-        driver.manage().window().maximize();
-        driver.get(URL);
-    }
-
-    @AfterEach
-    public void tearDown() {
-
-        if (driver != null) driver.quit();
-    }
+public class AIAutomatedShoppingCart_TC16 extends BaseTest {
 
     @Test
     public void updateQuantity_endToEnd() {
 
-        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(0));
+        HomePage homePage =
+                new HomePage(driver);
 
-        int initialCount = getCartCount();
+        homePage.switchToStoreFrame();
 
-        WebElement addToCart = wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        By.cssSelector("button[data-button-action='add-to-cart']")
-                )
+        ProductPage productPage =
+                new ProductPage(driver);
+
+        productPage.clickAddToCart();
+
+        productPage.waitForCartModal();
+
+        productPage.clickProceedToCheckout();
+
+        assertEquals(
+                "1",
+                productPage.getQuantityValue(),
+                "Initial quantity should be 1"
         );
 
-        scrollAndClick(addToCart);
+        productPage.clickPlusButton(2);
 
-        handleModalIfPresent();
-
-        int afterAdd = getCartCount();
-
-        assertEquals(initialCount + 1, afterAdd, "Product not added");
-
-        openCart();
-
-        for (int i = 0; i < 2; i++) {
-
-            wait.until(driver -> {
-
-                try {
-
-                    WebElement plus = driver.findElement(
-                            By.cssSelector(".js-increment-button")
-                    );
-
-                    plus.click();
-
-                    return true;
-
-                } catch (StaleElementReferenceException e) {
-
-                    return false;
-                }
-            });
-        }
-
-        WebElement input = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector("input.js-cart-line-product-quantity")
-                )
+        WaitUtils.waitForCondition(
+                driver,
+                d -> productPage.getQuantityValue()
+                        .equals("3")
         );
-
-        wait.until(d -> input.getAttribute("value").equals("3"));
 
         assertEquals(
                 "3",
-                input.getAttribute("value"),
-                "Quantity not updated correctly"
-        );
-    }
-
-    private void scrollAndClick(WebElement el) {
-
-        ((JavascriptExecutor) driver)
-                .executeScript("arguments[0].scrollIntoView({block:'center'});", el);
-
-        try {
-
-            wait.until(ExpectedConditions.elementToBeClickable(el)).click();
-
-        } catch (Exception e) {
-
-            ((JavascriptExecutor) driver)
-                    .executeScript("arguments[0].click();", el);
-        }
-    }
-
-    private void handleModalIfPresent() {
-
-        try {
-
-            WebElement modal = new WebDriverWait(driver, Duration.ofSeconds(3))
-                    .until(ExpectedConditions.visibilityOfElementLocated(
-                            By.cssSelector("#blockcart-modal.show")
-                    ));
-
-            WebElement closeBtn = modal.findElement(
-                    By.cssSelector("button[data-bs-dismiss='modal']")
-            );
-
-            scrollAndClick(closeBtn);
-
-        } catch (TimeoutException ignored) {
-
-            System.out.println("No modal appeared");
-        }
-    }
-
-    private int getCartCount() {
-
-        try {
-
-            WebElement badge = wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(
-                            By.cssSelector(".header-block__badge")
-                    )
-            );
-
-            return Integer.parseInt(badge.getText().trim());
-
-        } catch (Exception e) {
-
-            return 0;
-        }
-    }
-
-    private void openCart() {
-
-        WebElement cartIcon = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(".header-block__action-btn")
-                )
+                productPage.getQuantityValue(),
+                "Quantity should update to 3"
         );
 
-        scrollAndClick(cartIcon);
+        productPage.clickMinusButton();
 
-        WebElement viewCart = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector("a[href*='cart?action=show']")
-                )
+        WaitUtils.waitForCondition(
+                driver,
+                d -> productPage.getQuantityValue()
+                        .equals("2")
         );
 
-        scrollAndClick(viewCart);
+        assertEquals(
+                "2",
+                productPage.getQuantityValue(),
+                "Quantity should update to 2"
+        );
+
+        assertTrue(
+                Integer.parseInt(
+                        productPage.getQuantityValue()
+                ) > 0,
+                "Quantity should remain positive"
+        );
     }
 }

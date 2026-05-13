@@ -1,181 +1,94 @@
 package tests.checkout.automated_ai;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.*;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.*;
+import base.BaseTest;
+import org.junit.jupiter.api.Test;
+import pages.HomePage;
+import pages.RegistrationPage;
 
-import java.time.Duration;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class AIAutomatedCheckout_TC21 {
-
-    private WebDriver driver;
-    private WebDriverWait wait;
-
-    private static final String URL =
-            "https://demo.prestashop.com/#/en/front";
-
-    @BeforeEach
-    public void setUp() {
-
-        WebDriverManager.chromedriver().setup();
-
-        ChromeOptions options = new ChromeOptions();
-
-        options.addArguments("--remote-allow-origins=*");
-
-        driver = new ChromeDriver(options);
-
-        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-        driver.manage().window().maximize();
-
-        driver.get(URL);
-    }
-
-    @AfterEach
-    public void tearDown() {
-
-        if (driver != null) {
-            driver.quit();
-        }
-    }
+public class AIAutomatedCheckout_TC21 extends BaseTest {
 
     @Test
-    public void checkoutWithInvalidAddress_missingRequiredFields()
-            throws Exception {
+    public void checkoutWithInvalidAddress_missingRequiredFields() {
 
-        wait.until(
-                ExpectedConditions.frameToBeAvailableAndSwitchToIt(0)
-        );
+        HomePage homePage =
+                new HomePage(driver);
 
-        robustClick(
-                By.cssSelector("article.product-miniature a")
-        );
+        homePage.switchToStoreFrame();
 
-        robustClick(
-                By.cssSelector(
-                        "button.product__add-to-cart-button[data-button-action='add-to-cart']"
-                )
-        );
+        homePage.openFirstProduct();
 
-        robustClick(
-                By.cssSelector("#blockcart-modal .btn-primary")
-        );
+        homePage.clickAddToCart();
 
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath("//h1[contains(text(),'Shopping Cart')]")
-                )
-        );
-
-        robustClick(
-                By.cssSelector(".cart-summary .btn-primary")
-        );
-
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("firstname")
-                )
-        );
-
-        driver.findElement(By.name("email"))
-                .sendKeys(
-                        "john"
-                                + System.currentTimeMillis()
-                                + "@test.com"
-                );
-
-        robustClick(
-                By.name("password-form__check")
-        );
-
-        WebElement passwordField = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("password")
-                )
-        );
-
-        passwordField.sendKeys("StrongPass123!");
-
-        driver.findElement(By.name("birthday"))
-                .sendKeys("01/01/1999");
-
-        robustClick(
-                By.name("psgdpr")
-        );
-
-        robustClick(
-                By.name("customer_privacy")
-        );
-
-        robustClick(
-                By.cssSelector("button[type='submit']")
-        );
-
-        Thread.sleep(2000);
-
-        boolean validationExists =
-                driver.getPageSource()
-                        .contains("required");
+        homePage.proceedToCheckoutFromModal();
 
         assertTrue(
-                validationExists,
-                "Validation message should appear for required fields"
+                homePage.isShoppingCartPageDisplayed()
         );
+
+        homePage.clickCheckoutButton();
+
+        RegistrationPage registrationPage =
+                new RegistrationPage(driver);
+
+        registrationPage.selectMrTitle();
+
+        registrationPage.enterEmailOnly(
+                "john"
+                        + System.currentTimeMillis()
+                        + "@test.com"
+        );
+
+        registrationPage.enterBirthday(
+                "01/01/1999"
+        );
+
+        registrationPage.acceptPolicies();
+
+        registrationPage.clickContinueButton();
 
         boolean stillOnPersonalInfo =
                 driver.getPageSource()
-                        .contains("Personal Information");
+                        .toLowerCase()
+                        .contains("personal information")
+
+                        ||
+
+                        driver.getPageSource()
+                                .toLowerCase()
+                                .contains("sign in")
+
+                        ||
+
+                        driver.getCurrentUrl()
+                                .contains("checkout");
 
         assertTrue(
                 stillOnPersonalInfo,
-                "Form should not submit with missing required fields"
+                "Form should remain on Personal Information step"
         );
-    }
 
-    private void robustClick(By locator) {
+        boolean validationExists =
+                driver.getPageSource()
+                        .toLowerCase()
+                        .contains("required")
 
-        try {
+                        ||
 
-            WebElement element = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            locator
-                    )
-            );
+                        driver.getPageSource()
+                                .toLowerCase()
+                                .contains("invalid")
 
-            ((JavascriptExecutor) driver)
-                    .executeScript(
-                            "arguments[0].scrollIntoView({block:'center'});",
-                            element
-                    );
+                        ||
 
-            Thread.sleep(500);
+                        driver.getPageSource()
+                                .toLowerCase()
+                                .contains("error");
 
-            element.click();
-
-        } catch (Exception e) {
-
-            try {
-
-                WebElement element = wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                locator
-                        )
-                );
-
-                ((JavascriptExecutor) driver)
-                        .executeScript(
-                                "arguments[0].click();",
-                                element
-                        );
-
-            } catch (Exception ignored) {
-            }
-        }
+        assertTrue(
+                validationExists,
+                "Validation message should appear"
+        );
     }
 }

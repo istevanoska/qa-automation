@@ -1,70 +1,49 @@
 package tests.error_handling.manual;
 
-import org.junit.jupiter.api.*;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.*;
+import base.BaseTest;
+import org.junit.jupiter.api.Test;
+import pages.HomePage;
 
-import java.time.Duration;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 // ~15 mins generation + fixes
-//Additional server-side error scenarios such as
+// Additional server-side error scenarios such as
 // 403 Forbidden and 500 Internal Server Error could not be validated due to
 // limitations of the public demo environment.
 
-public class ErrorHandling_TC33 {
-
-    WebDriver driver;
-    WebDriverWait wait;
-
-    String HOME_URL = "https://demo.prestashop.com/#/en/front";
-
-    @BeforeEach
-    public void setUp() {
-
-        driver = new ChromeDriver();
-
-        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-        driver.manage().window().maximize();
-    }
-
-    @AfterEach
-    public void tearDown() {
-
-        if (driver != null) {
-            driver.quit();
-        }
-    }
+public class ErrorHandling_TC33 extends BaseTest {
 
     @Test
-    public void invalidProductShouldNotOpenValidProductPage() {
+    public void invalidProductShouldNotOpenValidProductPage()
+            throws Exception {
 
-        driver.get(HOME_URL);
+        HomePage homePage =
+                new HomePage(driver);
 
-        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(0));
+        homePage.switchToStoreFrame();
 
-        ((JavascriptExecutor) driver).executeScript(
-                "window.location.hash='#/en/999999-nonexistent-product.html';"
-        );
+        homePage.openInvalidProductPage();
 
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(3000);
 
-
-        String page = driver.getPageSource().toLowerCase();
+        String page =
+                driver.getPageSource()
+                        .toLowerCase();
 
         boolean validProductLoaded =
                 page.contains("add to cart")
-                        || page.contains("product-details")
-                        || page.contains("quantity");
 
-        assertFalse(validProductLoaded,
-                "Invalid product should NOT load valid product page");
+                        ||
+
+                        page.contains("product-details")
+
+                        ||
+
+                        page.contains("quantity");
+
+        assertFalse(
+                validProductLoaded,
+                "Invalid product should NOT load valid product page"
+        );
     }
 }

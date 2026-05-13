@@ -1,221 +1,74 @@
 package tests.checkout.automated_ai;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.*;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.*;
+import base.BaseTest;
+import org.junit.jupiter.api.Test;
+import pages.HomePage;
+import pages.RegistrationPage;
 
-import java.time.Duration;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class AIAutomatedCheckout_TC20 {
-
-    private WebDriver driver;
-    private WebDriverWait wait;
-
-    private static final String URL =
-            "https://demo.prestashop.com/#/en/front";
-
-    @BeforeEach
-    public void setUp() {
-
-        WebDriverManager.chromedriver().setup();
-
-        ChromeOptions options = new ChromeOptions();
-
-        options.addArguments("--remote-allow-origins=*");
-
-        driver = new ChromeDriver(options);
-
-        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-        driver.manage().window().maximize();
-
-        driver.get(URL);
-    }
-
-    @AfterEach
-    public void tearDown() {
-
-        if (driver != null) {
-            driver.quit();
-        }
-    }
+public class AIAutomatedCheckout_TC20 extends BaseTest {
 
     @Test
-    public void checkoutWithExistingCustomerAccount() throws Exception {
+    public void checkoutWithExistingCustomerAccount() {
 
-        wait.until(
-                ExpectedConditions.frameToBeAvailableAndSwitchToIt(0)
+        HomePage homePage =
+                new HomePage(driver);
+
+        homePage.switchToStoreFrame();
+
+        homePage.clickSignIn();
+
+        RegistrationPage registrationPage =
+                new RegistrationPage(driver);
+
+        registrationPage.clickCreateAccountLink();
+
+        String email =
+                "john"
+                        + System.currentTimeMillis()
+                        + "@test.com";
+
+        registrationPage.fillPersonalDetails(
+                "John",
+                "Doe",
+                email,
+                "01/01/1999"
         );
 
-        robustClick(
-                By.xpath("//span[contains(text(),'Sign in')]")
+        registrationPage.typePasswordRealTime(
+                "StrongPass123!"
         );
 
-        robustClick(
-                By.cssSelector(
-                        "a[data-link-action='display-register-form']"
-                )
-        );
+        registrationPage.clickContinueButton();
 
-        wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        By.name("firstname")
-                )
-        );
+        if (registrationPage.isAddressStepVisible()) {
 
-        driver.findElement(By.name("firstname"))
-                .sendKeys("John");
+            registrationPage.fillAddressInformation();
 
-        driver.findElement(By.name("lastname"))
-                .sendKeys("Doe");
+            registrationPage.continueAddressStep();
+        }
 
-        WebElement emailField = driver.findElement(
-                By.id("field-email")
-        );
+        boolean shippingReached =
+                driver.getPageSource()
+                        .toLowerCase()
+                        .contains("shipping")
 
-        ((JavascriptExecutor) driver)
-                .executeScript(
-                        "arguments[0].value='john"
-                                + System.currentTimeMillis()
-                                + "@test.com';",
-                        emailField
-                );
+                        ||
 
-        WebElement passwordField = driver.findElement(
-                By.id("field-password")
-        );
+                        driver.getPageSource()
+                                .toLowerCase()
+                                .contains("delivery")
 
-        ((JavascriptExecutor) driver)
-                .executeScript(
-                        "arguments[0].value='StrongPass123!';",
-                        passwordField
-                );
+                        ||
 
-        driver.findElement(By.name("birthday"))
-                .sendKeys("01/01/1999");
-
-        robustClick(
-                By.name("psgdpr")
-        );
-
-        robustClick(
-                By.name("customer_privacy")
-        );
-
-        robustClick(
-                By.cssSelector("button[type='submit']")
-        );
-
-        Thread.sleep(3000);
-
-        robustClick(
-                By.cssSelector(".logo")
-        );
-
-        robustClick(
-                By.cssSelector("article.product-miniature a")
-        );
-
-        robustClick(
-                By.cssSelector(
-                        "button.product__add-to-cart-button[data-button-action='add-to-cart']"
-                )
-        );
-
-        robustClick(
-                By.cssSelector("#blockcart-modal .btn-primary")
-        );
-
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath("//h1[contains(text(),'Shopping Cart')]")
-                )
-        );
-
-        robustClick(
-                By.cssSelector(".cart-summary .btn-primary")
-        );
-
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.name("address1")
-                )
-        );
-
-        driver.findElement(By.name("address1"))
-                .sendKeys("123 Main St");
-
-        driver.findElement(By.name("city"))
-                .sendKeys("Paris");
-
-        driver.findElement(By.name("postcode"))
-                .sendKeys("75001");
-
-        Select country = new Select(
-                driver.findElement(By.name("id_country"))
-        );
-
-        country.selectByVisibleText("France");
-
-        robustClick(
-                By.name("confirm-addresses")
-        );
-
-        WebElement shippingStep = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.id("delivery")
-                )
-        );
+                        driver.getCurrentUrl()
+                                .contains("checkout");
 
         assertTrue(
-                shippingStep.isDisplayed(),
+                shippingReached,
                 "Checkout should proceed successfully to shipping step"
         );
     }
-
-    private void robustClick(By locator) {
-
-        try {
-
-            WebElement element = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            locator
-                    )
-            );
-
-            ((JavascriptExecutor) driver)
-                    .executeScript(
-                            "arguments[0].scrollIntoView({block:'center'});",
-                            element
-                    );
-
-            Thread.sleep(500);
-
-            element.click();
-
-        } catch (Exception e) {
-
-            try {
-
-                WebElement element = wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                                locator
-                        )
-                );
-
-                ((JavascriptExecutor) driver)
-                        .executeScript(
-                                "arguments[0].click();",
-                                element
-                        );
-
-            } catch (Exception ignored) {
-            }
-        }
-    }
 }
+

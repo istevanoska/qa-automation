@@ -1,158 +1,54 @@
 package tests.shopping.automated_ai;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import base.BaseTest;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import pages.HomePage;
+import pages.ProductPage;
+import utils.WaitUtils;
 
-import java.time.Duration;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class AIAutomatedShoppingCart_TC15 {
-
-    private WebDriver driver;
-    private WebDriverWait wait;
-
-    private static final String URL =
-            "https://demo.prestashop.com/#/en/front";
-
-    @BeforeEach
-    public void setUp() {
-
-        WebDriverManager.chromedriver().setup();
-
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--remote-allow-origins=*");
-
-        driver = new ChromeDriver(options);
-
-        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-        driver.manage().window().maximize();
-
-        driver.get(URL);
-    }
-
-    @AfterEach
-    public void tearDown() {
-
-        if (driver != null) {
-            driver.quit();
-        }
-    }
+public class AIAutomatedShoppingCart_TC15 extends BaseTest {
 
     @Test
     public void removeItemFromCart() {
 
-        wait.until(
-                ExpectedConditions.frameToBeAvailableAndSwitchToIt(0)
-        );
+        HomePage homePage =
+                new HomePage(driver);
 
+        homePage.switchToStoreFrame();
 
-        WebElement addToCartButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(
-                                "button[data-button-action='add-to-cart']"
-                        )
-                )
-        );
+        ProductPage productPage =
+                new ProductPage(driver);
 
-        jsClick(addToCartButton);
-
-
-        WebElement modal = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.id("blockcart-modal")
-                )
-        );
+        productPage.clickAddToCart();
 
         assertTrue(
-                modal.isDisplayed(),
+                productPage.waitForCartModal().isDisplayed(),
                 "Cart modal should appear"
         );
 
-
-        WebElement proceedToCheckout = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(
-                                "#blockcart-modal a[href*='cart?action=show']"
-                        )
-                )
-        );
-
-        jsClick(proceedToCheckout);
-
-
-        WebElement quantityInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(
-                                "input.js-cart-line-product-quantity"
-                        )
-                )
-        );
+        productPage.clickProceedToCheckout();
 
         assertEquals(
                 "1",
-                quantityInput.getAttribute("value"),
+                productPage.getQuantityValue(),
                 "Cart should initially contain 1 product"
         );
 
+        productPage.clickMinusButton();
 
-        WebElement minusButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        By.id("decrement_button_1")
-                )
-        );
-
-        jsClick(minusButton);
-
-
-        wait.until(driver -> {
-
-            try {
-
-                WebElement badge = driver.findElement(
-                        By.cssSelector(".header-block__badge")
-                );
-
-                return badge.getText().trim().equals("0");
-
-            } catch (Exception e) {
-
-                return true;
-            }
-        });
-
-        WebElement cartBadge = driver.findElement(
-                By.cssSelector(".header-block__badge")
+        WaitUtils.waitForCondition(
+                driver,
+                d -> productPage.getCartBadgeCount()
+                        .equals("0")
         );
 
         assertEquals(
                 "0",
-                cartBadge.getText().trim(),
+                productPage.getCartBadgeCount(),
                 "Cart should be empty after removing item"
         );
-    }
-
-
-    private void jsClick(WebElement element) {
-
-        ((JavascriptExecutor) driver)
-                .executeScript(
-                        "arguments[0].scrollIntoView({block:'center'});",
-                        element
-                );
-
-        ((JavascriptExecutor) driver)
-                .executeScript(
-                        "arguments[0].click();",
-                        element
-                );
     }
 }

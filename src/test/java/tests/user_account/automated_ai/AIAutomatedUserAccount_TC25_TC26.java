@@ -8,7 +8,7 @@ import pages.LoginPage;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TC25_TC26_LoginTest extends BaseTest {
+public class AIAutomatedUserAccount_TC25_TC26 extends BaseTest {
 
     private static final String EMAIL = "pub@prestashop.com";
     private static final String PASSWORD = "123456789";

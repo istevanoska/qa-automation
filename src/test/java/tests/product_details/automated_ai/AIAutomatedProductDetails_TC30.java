@@ -12,7 +12,7 @@ import pages.ProductPage;
 import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TC30_ImageGalleryTest extends BaseTest {
+public class AIAutomatedProductDetails_TC30 extends BaseTest {
 
     // TC.30 - Product Image Gallery - Zoom and Modal
     @Test

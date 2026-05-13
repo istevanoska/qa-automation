@@ -6,7 +6,7 @@ import pages.HomePage;
 import pages.RegistrationPage;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TC24_PasswordRequirementsTest extends BaseTest {
+public class AIAutomatedUserAccount_TC24 extends BaseTest {
 
     //TC.24 - Password Requirements Visibility During Registration
     @Test

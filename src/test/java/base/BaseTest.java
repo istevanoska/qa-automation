@@ -1,11 +1,12 @@
 package base;
 
-import org.junit.jupiter.api.*;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,8 @@ public class BaseTest {
 
     @BeforeEach
     public void setUp() {
+
+        WebDriverManager.chromedriver().setup();
 
         ChromeOptions options = new ChromeOptions();
 
@@ -26,20 +29,24 @@ public class BaseTest {
         options.addArguments("--disable-features=PasswordManagerOnboarding,PasswordLeakDetection");
 
         Map<String, Object> prefs = new HashMap<>();
+
         prefs.put("credentials_enable_service", false);
         prefs.put("profile.password_manager_enabled", false);
+
         options.setExperimentalOption("prefs", prefs);
 
         driver = new ChromeDriver(options);
 
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         driver.manage().deleteAllCookies();
 
-        driver.get("https://demo.prestashop.com/#/en/front");
+        driver.get(
+                "https://demo.prestashop.com/#/en/front"
+        );
     }
 
     @AfterEach
     public void tearDown() {
+
         if (driver != null) {
             driver.quit();
         }
