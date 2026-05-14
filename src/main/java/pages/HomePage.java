@@ -9,6 +9,7 @@ import utils.FrameUtils;
 import utils.WaitUtils;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomePage {
@@ -874,12 +875,12 @@ public class HomePage {
 
     public List<WebElement> getProductPrices() {
 
-        return driver.findElements(
-                        By.cssSelector(".product-miniature__price")
-                )
-                .stream()
-                .filter(WebElement::isDisplayed)
-                .toList();
+        return WaitUtils.waitForVisible(
+                driver,
+                By.cssSelector(".products")
+        ).findElements(
+                By.cssSelector(".product-miniature__price")
+        );
     }
 
     public void waitUntilAllProductPricesAreWithinRange(String selectedRange) {
@@ -936,6 +937,7 @@ public class HomePage {
 
         return Double.parseDouble(cleanedPrice);
     }
+
 
 
     public void openNewProductsPage() {
@@ -1211,6 +1213,162 @@ public class HomePage {
                 .filter(WebElement::isDisplayed)
                 .toList();
     }
+
+    public void openFilterSection(String sectionName) {
+
+        WebElement section =
+                WaitUtils.waitForVisible(
+                        driver,
+                        By.cssSelector("section[data-name='" + sectionName + "']")
+                );
+
+        WaitUtils.scrollIntoView(
+                driver,
+                section
+        );
+
+        WebElement button =
+                WaitUtils.waitForClickable(
+                        driver,
+                        By.cssSelector("section[data-name='" + sectionName + "'] button.accordion-button")
+                );
+
+        if (button
+                .getAttribute("class")
+                .contains("collapsed")) {
+
+            WaitUtils.jsClick(
+                    driver,
+                    button
+            );
+        }
+    }
+
+    public int getActiveFiltersCount() {
+
+        return driver.findElements(
+                        By.cssSelector(".search-filters__item.facet-label.active")
+                )
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .toList()
+                .size();
+    }
+
+
+
+    public void selectSortOption(String optionText) {
+
+        WebElement sortButton =
+                WaitUtils.waitForClickable(
+                        driver,
+                        By.cssSelector(".products__sort-dropdown-button")
+                );
+
+        WaitUtils.scrollIntoView(driver, sortButton);
+        WaitUtils.jsClick(driver, sortButton);
+
+        WebElement sortOption =
+                WaitUtils.waitForClickable(
+                        driver,
+                        By.xpath(
+                                "//a[contains(@class,'js-search-link') and normalize-space()='"
+                                        + optionText
+                                        + "']"
+                        )
+                );
+
+        WaitUtils.jsClick(driver, sortOption);
+
+        new WebDriverWait(driver, Duration.ofSeconds(20))
+                .ignoring(StaleElementReferenceException.class)
+                .until(driver ->
+                        driver.findElements(
+                                By.cssSelector(".products article.product-miniature")
+                        ).size() >= 2
+                );
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public List<Double> getDisplayedProductPricesForSorting() {
+
+        List<WebElement> productCards =
+                driver.findElements(
+                        By.cssSelector(".products article.product-miniature")
+                );
+
+        List<Double> prices =
+                new ArrayList<>();
+
+        for (WebElement card : productCards) {
+
+            try {
+
+                if (!card.isDisplayed()) {
+                    continue;
+                }
+
+                WebElement priceElement =
+                        card.findElement(
+                                By.cssSelector(".product-miniature__price")
+                        );
+
+                String priceText =
+                        priceElement.getText().trim();
+
+                if (!priceText.isBlank()) {
+                    prices.add(extractSinglePrice(priceText));
+                }
+
+            } catch (Exception ignored) {
+            }
+        }
+
+        return prices;
+    }
+
+    public List<String> getDisplayedProductNamesForSorting() {
+
+        List<WebElement> productCards =
+                driver.findElements(
+                        By.cssSelector(".products article.product-miniature")
+                );
+
+        List<String> names =
+                new ArrayList<>();
+
+        for (WebElement card : productCards) {
+
+            try {
+
+                if (!card.isDisplayed()) {
+                    continue;
+                }
+
+                WebElement titleElement =
+                        card.findElement(
+                                By.cssSelector(".product-miniature__title")
+                        );
+
+                String name =
+                        titleElement.getText().trim();
+
+                if (!name.isBlank()) {
+                    names.add(name);
+                }
+
+            } catch (Exception ignored) {
+            }
+        }
+
+        return names;
+    }
+
 
 
 
