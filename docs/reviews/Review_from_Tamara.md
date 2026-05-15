@@ -566,29 +566,29 @@ But ensure this practice continues.
 
 ### Priority 2: MAJOR (Fix Within 2-4 Weeks)
 
-5. **Enhance Assertion Logic**
+4**Enhance Assertion Logic**
    - Replace string-based assertions with UI element verification
    - Add granular assertions for each step
    - **Timeline:** 2 weeks
 
-6. **Implement Test Data Management**
+5**Implement Test Data Management**
    - Create TestDataFactory
    - Centralize test data generation
    - **Timeline:** 1 week
    
-7. **Establish Consistent Wait Strategy**
+6**Establish Consistent Wait Strategy**
    - Document wait best practices
    - Create WaitUtils extensions
    - **Timeline:** 1 week
 
 ### Priority 3: MAJOR (Fix Within 4-8 Weeks)
 
-8. **Complete Page Object Model Implementation**
+7**Complete Page Object Model Implementation**
    - Eliminate direct WebDriver usage in tests
    - Create comprehensive page object methods
    - **Timeline:** 2-3 weeks
 
-9. **Add Test Infrastructure Enhancements**
+8**Add Test Infrastructure Enhancements**
     - Implement TestListener for screenshots
     - Add retry mechanism for flaky tests
     - **Timeline:** 2 weeks
