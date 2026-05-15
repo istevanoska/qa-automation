@@ -485,7 +485,7 @@ public class BaseTest { ... }
 ### 6.4 Security and Performance
 
 #### 6.4.1 Hardcoded Test Credentials
-**Not observed in reviewed files** ✅
+**Not observed in reviewed files**
 But ensure this practice continues.
 
 #### 6.4.2 Performance Impact
